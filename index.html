@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Práctica Firebase - TSAC</title>
+</head>
+<body>
+
+    <h1>Registro de Usuarios</h1>
+
+    <!-- campo donde el usuario capturará la información -->
+    <input
+        type="text"
+        id="nombre"
+        placeholder="Ingrese un nombre">
+
+    <!-- botón para la función guardar() -->
+    <button onclick="guardar()">
+        Guardar
+    </button>
+
+    <button onclick="mostrar()">
+    Mostrar usuarios
+    </button>
+
+    <hr>
+
+    <div id="resultado">
+    </div>
+
+    <script type="module">
+
+        /***************************************************************
+        * IMPORTACIÓN DE LIBRERÍAS FIREBASE
+        * Se utilizan los módulos necesarios para:
+        * 1. Inicializar la conexión con Firebase.
+        * 2. Acceder a la base de datos Firestore.
+        * 3. Insertar documentos dentro de una colección.
+        ***************************************************************/
+
+        import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            getDocs
+        }
+        from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        /* CONFIGURACIÓN DEL PROYECTO FIREBASE estos datos son proporcionados automáticamente por Firebase cuando registramos la app y copiamos*/
+
+        const firebaseConfig = {
+
+            apiKey: "AIzaSyAy6lIzhOI6I3Tkxx2gqGdQUEcV2UtSykI",
+            authDomain: "pruebatssac.firebaseapp.com",
+            projectId: "pruebatssac",
+            storageBucket: "pruebatssac.firebasestorage.app",
+            messagingSenderId: "732485260511",
+            appId: "1:732485260511:web:0e3097dd5118b33009056a"
+        };
+
+        /* Se establece la conexión entre la aplicación web y el proyecto alojado en la nube */
+
+        const app = initializeApp(firebaseConfig);
+
+        /***************************************************************
+        * CONEXIÓN CON FIRESTORE
+        * Firestore es la base de datos NoSQL utilizada para almacenar
+        * la información capturada desde la página web.
+        ***************************************************************/
+
+        const db = getFirestore(app);
+
+        /*capturar el nombre ingresado por el usuario y almacenarlo dentro de la colección "usuarios".*/
+
+        window.guardar = async function() {
+
+            /* obtener el valor escrito en la caja de texto */
+
+            const nombre = document.getElementById("nombre").value;
+            try {
+
+                /* Agregar un nuevo documento a la colección llamada "usuarios"
+                * Si la colección no existe, Firestore la crea automáticamente*/
+
+                await addDoc(
+                    collection(db, "usuarios"),
+                    {
+                        nombre: nombre
+                    }
+                );
+
+                /* Confirmación para el usuario */
+
+                alert("Registro guardado correctamente");
+
+            } catch(error) {
+
+                /* Si ocurre algún problema de conexión o permisos,se mostrará el error en la consola*/
+
+                console.log(error);
+
+                alert("Error al guardar el registro");
+
+            }
+
+        }
+
+        window.mostrar = async function() {
+
+            const consulta =
+                await getDocs(
+                    collection(db,"usuarios")
+                );
+
+            let salida = "";
+
+            consulta.forEach((doc) => {
+
+                salida +=
+                    doc.data().nombre +
+                    "<br>";
+
+            });
+
+            document.getElementById("resultado")
+                .innerHTML = salida;
+
+        }
+
+    </script>
+
+</body>
+</html>
